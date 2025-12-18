@@ -42,7 +42,7 @@ RUN npm install
 COPY . .
 
 # Build assets
-RUN npm run build
+RUN npm run build && rm -rf node_modules
 
 # Configure Nginx
 COPY docker/nginx.conf /etc/nginx/sites-available/default
