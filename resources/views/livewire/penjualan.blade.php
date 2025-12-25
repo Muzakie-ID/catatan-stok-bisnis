@@ -42,7 +42,7 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" class="checkbox checkbox-primary" checked="{{ in_array($hp->id, $selectedHps) ? 'checked' : '' }}" />
+                                <input type="checkbox" class="checkbox checkbox-primary pointer-events-none" {{ in_array($hp->id, $selectedHps) ? 'checked' : '' }} />
                             </div>
                         </div>
                     </div>
