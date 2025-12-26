@@ -1,14 +1,14 @@
 <div>
     <dialog id="modal_detail_hp" class="modal modal-bottom sm:modal-middle" wire:ignore.self>
-        <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl h-[85vh] flex flex-col">
+        <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl">
             
             <!-- Handle Bar -->
-            <div class="w-full flex justify-center pt-3 pb-1 flex-none" onclick="modal_detail_hp.close()">
+            <div class="w-full flex justify-center pt-3 pb-1" onclick="modal_detail_hp.close()">
                 <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
             </div>
 
             @if($hp)
-            <div class="flex-1 overflow-y-auto p-6 pt-2">
+            <div class="p-6 pt-2">
                 
                 @if($isEditing)
                     <!-- FORM EDIT -->
