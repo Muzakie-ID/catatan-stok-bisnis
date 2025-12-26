@@ -47,6 +47,22 @@
                             @error('merk_model') <span class="text-error text-xs mt-1 ml-1">{{ $message }}</span> @enderror
                         </div>
 
+                        <!-- Warna & Minus -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label py-1">
+                                    <span class="label-text font-medium text-gray-600">Warna</span>
+                                </label>
+                                <input wire:model="warna" type="text" placeholder="Hitam" class="input input-bordered w-full rounded-xl bg-gray-50 focus:bg-white transition-colors" />
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label py-1">
+                                    <span class="label-text font-medium text-gray-600">Minus (Opsional)</span>
+                                </label>
+                                <input wire:model="keterangan_minus" type="text" placeholder="Lecet, dll" class="input input-bordered w-full rounded-xl bg-gray-50 focus:bg-white transition-colors" />
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <!-- Harga Beli -->
                             <div class="form-control w-full">
@@ -107,6 +123,12 @@
                                             <div>
                                                 <div class="font-bold text-sm">{{ $item['merk_model'] }}</div>
                                                 <div class="text-xs text-gray-400">{{ $item['imei'] }}</div>
+                                                @if(!empty($item['warna']) || !empty($item['keterangan_minus']))
+                                                    <div class="text-[10px] text-gray-500 mt-0.5">
+                                                        {{ $item['warna'] ?? '-' }} 
+                                                        @if(!empty($item['keterangan_minus'])) | <span class="text-red-500">{{ $item['keterangan_minus'] }}</span> @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="flex items-center gap-2">
                                                 <span class="text-sm font-semibold text-gray-600">Rp {{ number_format($item['harga_beli_awal'], 0, ',', '.') }}</span>
@@ -138,6 +160,11 @@
                                 
                                 <input wire:model="merk_model" type="text" placeholder="Merk & Model" class="input input-sm input-bordered w-full" />
                                 @error('merk_model') <span class="text-error text-xs">{{ $message }}</span> @enderror
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input wire:model="warna" type="text" placeholder="Warna" class="input input-sm input-bordered w-full" />
+                                    <input wire:model="keterangan_minus" type="text" placeholder="Minus (Opsional)" class="input input-sm input-bordered w-full" />
+                                </div>
                                 
                                 <div class="relative" x-data="{
                                     price: @entangle('harga_beli_awal'),

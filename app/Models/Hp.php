@@ -9,6 +9,8 @@ class Hp extends Model
     protected $fillable = [
         'imei',
         'merk_model',
+        'warna',
+        'keterangan_minus',
         'sumber_beli',
         'harga_beli_awal',
         'total_modal',

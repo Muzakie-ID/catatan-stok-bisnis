@@ -13,6 +13,8 @@ class InputStok extends Component
     // Form Fields
     public $imei;
     public $merk_model;
+    public $warna;
+    public $keterangan_minus;
     public $harga_beli_awal;
     public $sumber_beli;
 
@@ -23,6 +25,8 @@ class InputStok extends Component
     protected $rules = [
         'imei' => 'required|unique:hps,imei',
         'merk_model' => 'required',
+        'warna' => 'nullable|string',
+        'keterangan_minus' => 'nullable|string',
         'harga_beli_awal' => 'required|numeric|min:0',
         'sumber_beli' => 'nullable|string',
     ];
@@ -30,7 +34,7 @@ class InputStok extends Component
     public function setMode($mode)
     {
         $this->mode = $mode;
-        $this->reset(['imei', 'merk_model', 'harga_beli_awal', 'bulkItems', 'total_borongan']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'bulkItems', 'total_borongan']);
     }
 
     // --- Logic Satuan ---
@@ -41,13 +45,15 @@ class InputStok extends Component
         Hp::create([
             'imei' => $this->imei,
             'merk_model' => $this->merk_model,
+            'warna' => $this->warna,
+            'keterangan_minus' => $this->keterangan_minus,
             'harga_beli_awal' => $this->harga_beli_awal,
             'total_modal' => $this->harga_beli_awal,
             'sumber_beli' => $this->sumber_beli,
             'status' => 'READY',
         ]);
 
-        $this->reset(['imei', 'merk_model', 'harga_beli_awal', 'sumber_beli']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli']);
         
         $this->dispatch('stok-saved'); 
         $this->dispatch('close-modal');
@@ -59,6 +65,8 @@ class InputStok extends Component
         $this->validate([
             'imei' => 'required|unique:hps,imei',
             'merk_model' => 'required',
+            'warna' => 'nullable|string',
+            'keterangan_minus' => 'nullable|string',
             'harga_beli_awal' => 'required|numeric|min:0',
         ]);
 
@@ -73,11 +81,13 @@ class InputStok extends Component
         $this->bulkItems[] = [
             'imei' => $this->imei,
             'merk_model' => $this->merk_model,
+            'warna' => $this->warna,
+            'keterangan_minus' => $this->keterangan_minus,
             'harga_beli_awal' => $this->harga_beli_awal,
         ];
 
         $this->calculateTotalBorongan();
-        $this->reset(['imei', 'merk_model', 'harga_beli_awal']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal']);
     }
 
     public function removeBulkItem($index)
@@ -104,6 +114,8 @@ class InputStok extends Component
                 Hp::create([
                     'imei' => $item['imei'],
                     'merk_model' => $item['merk_model'],
+                    'warna' => $item['warna'] ?? null,
+                    'keterangan_minus' => $item['keterangan_minus'] ?? null,
                     'harga_beli_awal' => $item['harga_beli_awal'],
                     'total_modal' => $item['harga_beli_awal'],
                     'sumber_beli' => $this->sumber_beli,
@@ -112,7 +124,7 @@ class InputStok extends Component
             }
         });
 
-        $this->reset(['imei', 'merk_model', 'harga_beli_awal', 'sumber_beli', 'bulkItems', 'total_borongan']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli', 'bulkItems', 'total_borongan']);
         
         $this->dispatch('stok-saved'); 
         $this->dispatch('close-modal');
