@@ -31,6 +31,16 @@
                         <div class="divider my-2"></div>
                     </div>
 
+                    <!-- Warna & Minus -->
+                    <div class="flex flex-wrap gap-1 mb-2">
+                        @if($hp->warna)
+                            <span class="badge badge-xs badge-ghost">{{ $hp->warna }}</span>
+                        @endif
+                        @if($hp->keterangan_minus)
+                            <span class="badge badge-xs badge-error badge-outline">Minus: {{ $hp->keterangan_minus }}</span>
+                        @endif
+                    </div>
+
                     <div class="flex justify-between items-center">
                         <div class="text-xs text-gray-400">
                             Sumber: {{ $hp->sumber_beli ?? '-' }}
