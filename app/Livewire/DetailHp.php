@@ -14,9 +14,64 @@ class DetailHp extends Component
     public $biaya_service;
     public $showServiceForm = false;
 
+    // Edit Mode Properties
+    public $isEditing = false;
+    public $edit_merk_model;
+    public $edit_warna;
+    public $edit_minus;
+    public $edit_sumber_beli;
+    public $edit_harga_beli_awal;
+
     public function toggleServiceForm()
     {
         $this->showServiceForm = !$this->showServiceForm;
+    }
+
+    public function toggleEdit()
+    {
+        $this->isEditing = !$this->isEditing;
+        if ($this->isEditing && $this->hp) {
+            $this->edit_merk_model = $this->hp->merk_model;
+            $this->edit_warna = $this->hp->warna;
+            $this->edit_minus = $this->hp->keterangan_minus;
+            $this->edit_sumber_beli = $this->hp->sumber_beli;
+            $this->edit_harga_beli_awal = $this->hp->harga_beli_awal;
+        }
+    }
+
+    public function updateHp()
+    {
+        $this->validate([
+            'edit_merk_model' => 'required|string',
+            'edit_warna' => 'nullable|string',
+            'edit_minus' => 'nullable|string',
+            'edit_sumber_beli' => 'nullable|string',
+            'edit_harga_beli_awal' => 'required|numeric|min:0',
+        ]);
+
+        // Hitung selisih harga beli jika berubah, untuk update total modal
+        $selisih = $this->edit_harga_beli_awal - $this->hp->harga_beli_awal;
+        
+        $this->hp->update([
+            'merk_model' => $this->edit_merk_model,
+            'warna' => $this->edit_warna,
+            'keterangan_minus' => $this->edit_minus,
+            'sumber_beli' => $this->edit_sumber_beli,
+            'harga_beli_awal' => $this->edit_harga_beli_awal,
+            'total_modal' => $this->hp->total_modal + $selisih,
+        ]);
+
+        $this->isEditing = false;
+        $this->dispatch('stok-saved'); // Refresh list utama
+    }
+
+    public function deleteHp()
+    {
+        if ($this->hp) {
+            $this->hp->delete();
+            $this->dispatch('stok-saved');
+            $this->dispatch('close-modal-detail'); // Perlu handle ini di JS view
+        }
     }
 
     #[On('open-detail-hp')]
@@ -24,6 +79,7 @@ class DetailHp extends Component
     {
         $this->hp = Hp::with('services')->find($id);
         $this->showServiceForm = false;
+        $this->isEditing = false;
         $this->dispatch('show-modal-detail');
     }
 
