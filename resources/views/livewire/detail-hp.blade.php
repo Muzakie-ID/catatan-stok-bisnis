@@ -61,6 +61,8 @@
                     </div>
                 @else
                     <!-- TAMPILAN DETAIL -->
+                    <!-- Dummy focus element to prevent dropdown auto-open -->
+                    <button class="opacity-0 absolute h-0 w-0 overflow-hidden"></button>
                     
                     <!-- Header Info -->
                     <div class="flex justify-between items-start mb-4">
