@@ -48,8 +48,8 @@
                                     e.target.value = this.format(raw);
                                 }
                             }">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
                                 <input type="text" :value="format(price)" @input="input" class="input input-bordered w-full pl-10" />
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold pointer-events-none">Rp</span>
                             </div>
                             @error('edit_harga_beli_awal') <span class="text-error text-xs">{{ $message }}</span> @enderror
                         </div>
