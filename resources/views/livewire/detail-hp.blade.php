@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="flex gap-2 pt-4">
-                            <button wire:click="toggleEdit" class="btn btn-ghost flex-1">Batal</button>
+                            <button wire:click="toggleEdit" class="btn btn-error text-white flex-1">Batal</button>
                             <button wire:click="updateHp" class="btn btn-primary flex-1">Simpan Perubahan</button>
                         </div>
                     </div>
@@ -125,7 +125,6 @@
                             </div>
                         </div>
                     </div>
-                @endif
 
                 <!-- Service History Section -->
                 <div class="mb-6">
@@ -180,6 +179,7 @@
                         @endforelse
                     </div>
                 </div>
+                @endif
 
             </div>
             @else
