@@ -37,6 +37,14 @@
                             <div>
                                 <h3 class="font-bold text-lg">{{ $hp->merk_model }}</h3>
                                 <div class="text-xs text-gray-500">IMEI: {{ $hp->imei }}</div>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    @if($hp->warna)
+                                        <span class="badge badge-xs badge-ghost">{{ $hp->warna }}</span>
+                                    @endif
+                                    @if($hp->keterangan_minus)
+                                        <span class="badge badge-xs badge-error badge-outline">Minus: {{ $hp->keterangan_minus }}</span>
+                                    @endif
+                                </div>
                                 <div class="text-sm font-semibold text-secondary mt-1">
                                     Modal: Rp {{ number_format($hp->total_modal, 0, ',', '.') }}
                                 </div>
@@ -106,6 +114,14 @@
                                         <div>
                                             <div class="font-bold">{{ $hp->merk_model }}</div>
                                             <div class="text-xs text-gray-500">{{ $hp->imei }}</div>
+                                            <div class="flex flex-wrap gap-1 mt-1">
+                                                @if($hp->warna)
+                                                    <span class="badge badge-xs badge-ghost">{{ $hp->warna }}</span>
+                                                @endif
+                                                @if($hp->keterangan_minus)
+                                                    <span class="badge badge-xs badge-error badge-outline">Minus: {{ $hp->keterangan_minus }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="badge badge-ghost text-xs">Modal: {{ number_format($hp->total_modal, 0, ',', '.') }}</div>
                                     </div>
