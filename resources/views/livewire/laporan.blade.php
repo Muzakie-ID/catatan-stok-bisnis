@@ -152,6 +152,10 @@
                             <span class="text-xs text-gray-500">Harga Beli Awal</span>
                             <span class="font-semibold text-gray-700">Rp {{ number_format($selectedDetail->hp->harga_beli_awal, 0, ',', '.') }}</span>
                         </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-500">Sumber Beli</span>
+                            <span class="font-semibold text-gray-700">{{ $selectedDetail->hp->sumber_beli ?? '-' }}</span>
+                        </div>
                         
                         <!-- Biaya Service -->
                         @php 
