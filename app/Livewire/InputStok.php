@@ -99,7 +99,11 @@ class InputStok extends Component
 
     public function calculateTotalBorongan()
     {
-        $this->total_borongan = array_sum(array_column($this->bulkItems, 'harga_beli_awal'));
+        $total = 0;
+        foreach ($this->bulkItems as $item) {
+            $total += (float) ($item['harga_beli_awal'] ?? 0);
+        }
+        $this->total_borongan = $total;
     }
 
     public function saveBulk()

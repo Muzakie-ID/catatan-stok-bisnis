@@ -165,7 +165,12 @@
                         </div>
                         
                         {{-- Summary Check --}}
-                        @php $sumItems = array_sum($harga_jual_items); @endphp
+                        @php 
+                            $sumItems = 0;
+                            foreach($harga_jual_items as $val) {
+                                $sumItems += (float) $val;
+                            }
+                        @endphp
                         <div class="mt-4 p-3 rounded-lg {{ $sumItems == $total_transaksi ? 'bg-success/10 text-success' : 'bg-error/10 text-error' }}">
                             <div class="flex justify-between text-sm font-bold">
                                 <span>Total Rincian:</span>

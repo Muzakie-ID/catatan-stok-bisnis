@@ -67,7 +67,10 @@ class Penjualan extends Component
         ]);
 
         // Validasi Total Item harus sama dengan Total Transaksi
-        $sumItems = array_sum($this->harga_jual_items);
+        $sumItems = 0;
+        foreach ($this->harga_jual_items as $val) {
+            $sumItems += (float) $val;
+        }
         if ($sumItems != $this->total_transaksi) {
             $this->addError('total_transaksi', 'Total rincian item (Rp '.number_format($sumItems).') tidak sama dengan Total Transaksi.');
             return;
