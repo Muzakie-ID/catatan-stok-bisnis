@@ -87,15 +87,11 @@
                         </div>
                         <div class="form-control w-full mt-2">
                             <label class="label"><span class="label-text font-bold">Total Transaksi (Semua Barang)</span></label>
-                            <input type="text" x-data="{
+                            <input type="text" readonly x-data="{
                                 val: @entangle('total_transaksi'),
-                                format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
-                                update(e) {
-                                    let raw = e.target.value.replace(/[^0-9]/g, '');
-                                    this.val = raw;
-                                    e.target.value = this.format(raw);
-                                }
-                            }" :value="format(val)" @input="update" class="input input-bordered input-lg w-full font-bold text-primary" placeholder="0" />
+                                format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' }
+                            }" :value="format(val)" class="input input-bordered input-lg w-full font-bold text-primary bg-gray-100" placeholder="0" />
+                            <label class="label"><span class="label-text-alt text-gray-500">*Otomatis terhitung dari total harga per unit</span></label>
                         </div>
                         @error('total_transaksi') <span class="text-error text-sm">{{ $message }}</span> @enderror
                     </div>

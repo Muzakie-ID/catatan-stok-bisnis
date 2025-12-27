@@ -46,33 +46,16 @@ class Penjualan extends Component
         $this->step = 1;
     }
 
-    // Fitur Pintar: Auto Split Harga
-    // Saat user update total transaksi atau harga item, kita bisa bantu hitung sisa
-    public function updatedTotalTransaksi()
+    // Fitur Pintar: Auto Hitung Total
+    // Total transaksi dihitung otomatis dari penjumlahan harga per item
+    public function updatedHargaJualItems()
     {
-        // Jika hanya 1 barang, langsung isi otomatis
-        if (count($this->selectedHps) == 1) {
-            $this->harga_jual_items[$this->selectedHps[0]] = $this->total_transaksi;
+        // Pastikan semua nilai numerik
+        $total = 0;
+        foreach ($this->harga_jual_items as $harga) {
+            $total += (float) $harga;
         }
-    }
-
-    public function updatedHargaJualItems($value, $key)
-    {
-        // Logika Auto Split Sederhana (Opsional, bisa dikembangkan)
-        // Jika ada 2 barang, dan barang 1 diisi, barang 2 otomatis sisa
-        if (count($this->selectedHps) == 2 && (float)$this->total_transaksi > 0) {
-            $otherId = null;
-            foreach ($this->selectedHps as $id) {
-                if ($id != $key) $otherId = $id;
-            }
-            
-            if ($otherId) {
-                // Pastikan nilai numerik untuk menghindari error string - string
-                $total = (float) $this->total_transaksi;
-                $currentVal = (float) $value;
-                $this->harga_jual_items[$otherId] = $total - $currentVal;
-            }
-        }
+        $this->total_transaksi = $total;
     }
 
     public function processPenjualan()
