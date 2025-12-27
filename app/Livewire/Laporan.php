@@ -11,12 +11,24 @@ class Laporan extends Component
 {
     public $startDate;
     public $endDate;
+    public $selectedDetail = null;
 
     public function mount()
     {
         // Default: Bulan ini
         $this->startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
         $this->endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+    }
+
+    public function showDetail($id)
+    {
+        $this->selectedDetail = DetailPenjualan::with(['penjualan', 'hp.services'])->find($id);
+        $this->dispatch('open-modal-detail');
+    }
+
+    public function closeDetail()
+    {
+        $this->selectedDetail = null;
     }
 
     public function render()

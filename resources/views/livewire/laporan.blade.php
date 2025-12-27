@@ -66,7 +66,10 @@
                     
                     <div class="space-y-2">
                         @foreach($items as $item)
-                            <div class="card bg-white border border-gray-100 shadow-sm">
+                            <div 
+                                wire:click="showDetail({{ $item->id }})"
+                                class="card bg-white border border-gray-100 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                            >
                                 <div class="card-body p-3">
                                     <div class="flex justify-between items-start">
                                         <div>
@@ -102,4 +105,117 @@
             @endforelse
         </div>
     </div>
+
+    <!-- Modal Detail Transaksi -->
+    <dialog id="modal_detail_transaksi" class="modal modal-bottom sm:modal-middle" wire:ignore.self>
+        <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl">
+            
+            <!-- Handle Bar -->
+            <div class="w-full flex justify-center pt-3 pb-1" onclick="modal_detail_transaksi.close()">
+                <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+            </div>
+
+            @if($selectedDetail)
+            <div class="p-6 pt-2">
+                <!-- Header Info -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-2xl text-gray-800">{{ $selectedDetail->hp->merk_model }}</h3>
+                    <p class="text-sm text-gray-500 font-mono mt-1">{{ $selectedDetail->hp->imei }}</p>
+                    
+                    <!-- Warna & Minus -->
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        @if($selectedDetail->hp->warna)
+                            <span class="badge badge-ghost text-xs">{{ $selectedDetail->hp->warna }}</span>
+                        @endif
+                        @if($selectedDetail->hp->keterangan_minus)
+                            <span class="badge badge-error badge-outline text-xs">Minus: {{ $selectedDetail->hp->keterangan_minus }}</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Info Transaksi -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-500">Tanggal Jual</span>
+                        <span class="font-semibold text-gray-700">{{ $selectedDetail->created_at->translatedFormat('d F Y, H:i') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-500">Pembeli</span>
+                        <span class="font-semibold text-gray-700">{{ $selectedDetail->penjualan->nama_pembeli ?? '-' }}</span>
+                    </div>
+                </div>
+
+                <!-- Financial Card -->
+                <div class="card bg-blue-50 border border-blue-100 mb-6">
+                    <div class="card-body p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-500">Harga Beli Awal</span>
+                            <span class="font-semibold text-gray-700">Rp {{ number_format($selectedDetail->hp->harga_beli_awal, 0, ',', '.') }}</span>
+                        </div>
+                        
+                        <!-- Biaya Service -->
+                        @php 
+                            $biayaService = $selectedDetail->hp->total_modal - $selectedDetail->hp->harga_beli_awal;
+                        @endphp
+                        @if($biayaService > 0)
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-500">Total Biaya Service</span>
+                            <span class="font-semibold text-red-500">+ Rp {{ number_format($biayaService, 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+
+                        <div class="divider my-1"></div>
+                        
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold text-gray-600">Total Modal</span>
+                            <span class="text-sm font-bold text-gray-600">Rp {{ number_format($selectedDetail->modal_terakhir, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold text-blue-800">Harga Jual</span>
+                            <span class="text-lg font-bold text-blue-800">Rp {{ number_format($selectedDetail->harga_jual_unit, 0, ',', '.') }}</span>
+                        </div>
+                        
+                        <div class="divider my-1"></div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-bold text-gray-800">Keuntungan Bersih</span>
+                            <span class="text-xl font-bold {{ $selectedDetail->laba_rugi >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $selectedDetail->laba_rugi >= 0 ? '+' : '' }} Rp {{ number_format($selectedDetail->laba_rugi, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Riwayat Service (Jika Ada) -->
+                @if($selectedDetail->hp->services->count() > 0)
+                <div class="mb-4">
+                    <h4 class="font-bold text-gray-700 text-sm mb-2">Riwayat Service</h4>
+                    <div class="space-y-2">
+                        @foreach($selectedDetail->hp->services as $service)
+                            <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100 text-xs">
+                                <span class="text-gray-600">{{ $service->deskripsi }}</span>
+                                <span class="font-bold text-red-500">Rp {{ number_format($service->biaya, 0, ',', '.') }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+            </div>
+            @else
+            <div class="flex-1 flex items-center justify-center p-10">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+            @endif
+        </div>
+        <form method="dialog" class="modal-backdrop bg-black/20 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <script>
+        window.addEventListener('open-modal-detail', event => {
+            document.getElementById('modal_detail_transaksi').showModal();
+        });
+    </script>
 </div>
