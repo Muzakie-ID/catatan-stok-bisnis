@@ -94,6 +94,24 @@
                             <label class="label"><span class="label-text-alt text-gray-500">*Otomatis terhitung dari total harga per unit</span></label>
                         </div>
                         @error('total_transaksi') <span class="text-error text-sm">{{ $message }}</span> @enderror
+
+                        {{-- Realtime Profit Info --}}
+                        @php
+                            $totalModal = $hps->sum('total_modal');
+                            $estimasiProfit = (float)$total_transaksi - $totalModal;
+                        @endphp
+                        <div class="grid grid-cols-2 gap-4 mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div>
+                                <div class="text-xs text-gray-500">Total Modal</div>
+                                <div class="font-bold text-gray-700">Rp {{ number_format($totalModal, 0, ',', '.') }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500">Estimasi Profit</div>
+                                <div class="font-bold {{ $estimasiProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ $estimasiProfit >= 0 ? '+' : '' }} Rp {{ number_format($estimasiProfit, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
