@@ -141,15 +141,18 @@
                                     </div>
                                     <div class="form-control">
                                         <label class="label py-0"><span class="label-text text-xs">Harga Jual Unit Ini</span></label>
-                                        <input type="text" x-data="{
-                                            val: @entangle('harga_jual_items.' . $hp->id).live,
-                                            format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
-                                            update(e) {
-                                                let raw = e.target.value.replace(/[^0-9]/g, '');
-                                                this.val = raw;
-                                                e.target.value = this.format(raw);
-                                            }
-                                        }" :value="format(val)" @input="update" class="input input-bordered input-sm w-full" placeholder="0" />
+                                        <div class="relative">
+                                            <input type="text" x-data="{
+                                                val: @entangle('harga_jual_items.' . $hp->id).live,
+                                                format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
+                                                update(e) {
+                                                    let raw = e.target.value.replace(/[^0-9]/g, '');
+                                                    this.val = raw;
+                                                    e.target.value = this.format(raw);
+                                                }
+                                            }" :value="format(val)" @input="update" class="input input-bordered input-sm w-full pl-8" placeholder="0" />
+                                            <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold pointer-events-none">Rp</span>
+                                        </div>
                                     </div>
                                     {{-- Kalkulasi Laba Realtime --}}
                                     @if(isset($harga_jual_items[$hp->id]) && is_numeric($harga_jual_items[$hp->id]))
