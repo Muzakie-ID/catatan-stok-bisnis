@@ -105,7 +105,7 @@
 
                         <div class="space-y-4">
                             @foreach($hps as $hp)
-                                <div class="p-3 bg-base-200 rounded-lg">
+                                <div class="p-3 bg-base-200 rounded-lg" wire:key="hp-item-{{ $hp->id }}">
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <div class="font-bold">{{ $hp->merk_model }}</div>
@@ -124,7 +124,7 @@
                                     <div class="form-control">
                                         <label class="label py-0"><span class="label-text text-xs">Harga Jual Unit Ini</span></label>
                                         <input type="text" x-data="{
-                                            val: @entangle('harga_jual_items.' . $hp->id),
+                                            val: @entangle('harga_jual_items.' . $hp->id).live,
                                             format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
                                             update(e) {
                                                 let raw = e.target.value.replace(/[^0-9]/g, '');
