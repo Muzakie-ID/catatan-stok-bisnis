@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Hp;
 use App\Models\Service;
+use App\Models\CashFlow;
 use Livewire\Attributes\On;
 
 class DetailHp extends Component
@@ -97,6 +98,19 @@ class DetailHp extends Component
             'biaya' => $this->biaya_service,
             'tanggal_service' => now(),
         ]);
+
+        // 2. Catat Pengeluaran Kas
+        if ($this->biaya_service > 0) {
+            CashFlow::create([
+                'date' => now(),
+                'type' => 'expense',
+                'category' => 'operasional', // Service masuk operasional atau kategori khusus
+                'amount' => $this->biaya_service,
+                'description' => "Biaya Service {$this->hp->merk_model}: {$this->deskripsi_service}",
+                'reference_type' => Hp::class,
+                'reference_id' => $this->hp->id,
+            ]);
+        }
 
         // 2. Update Total Modal HP
         $this->hp->total_modal += $this->biaya_service;

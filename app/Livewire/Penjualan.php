@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Hp;
 use App\Models\Penjualan as PenjualanModel;
 use App\Models\DetailPenjualan;
+use App\Models\CashFlow;
 use Illuminate\Support\Facades\DB;
 
 class Penjualan extends Component
@@ -100,6 +101,17 @@ class Penjualan extends Component
                 // Update Status HP
                 $hp->update(['status' => 'SOLD']);
             }
+
+            // 3. Catat Pemasukan Kas
+            CashFlow::create([
+                'date' => now(),
+                'type' => 'income',
+                'category' => 'penjualan',
+                'amount' => $this->total_transaksi,
+                'description' => "Penjualan " . count($this->selectedHps) . " unit. Pembeli: {$this->nama_pembeli}",
+                'reference_type' => PenjualanModel::class,
+                'reference_id' => $penjualan->id,
+            ]);
         });
 
         // Reset & Redirect

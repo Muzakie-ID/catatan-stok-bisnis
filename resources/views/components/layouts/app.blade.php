@@ -29,6 +29,14 @@
             <span class="text-[10px] font-medium">Stok</span>
         </a>
 
+        <!-- Penjualan -->
+        <a href="/penjualan" wire:navigate class="flex flex-col items-center justify-center w-full h-full {{ request()->is('penjualan*') ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="text-[10px] font-medium">Penjualan</span>
+        </a>
+
         <!-- Add Button (Center) -->
         <div class="relative -top-5">
             <button onclick="modal_input_stok.showModal()" class="bg-blue-600 text-white rounded-full h-14 w-14 shadow-lg grid place-items-center hover:bg-blue-700 transition-transform active:scale-95 border-4 border-gray-50">
@@ -36,12 +44,21 @@
             </button>
         </div>
 
-        <!-- Penjualan -->
-        <a href="/penjualan" wire:navigate class="flex flex-col items-center justify-center w-full h-full {{ request()->is('penjualan*') ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600' }}">
+        <!-- Service -->
+        <a href="/service" wire:navigate class="flex flex-col items-center justify-center w-full h-full {{ request()->is('service*') ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600' }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span class="text-[10px] font-medium">Penjualan</span>
+            <span class="text-[10px] font-medium">Service</span>
+        </a>
+
+        <!-- Keuangan -->
+        <a href="/keuangan" wire:navigate class="flex flex-col items-center justify-center w-full h-full {{ request()->is('keuangan*') ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-[10px] font-medium">Keuangan</span>
         </a>
 
         <!-- Laporan -->

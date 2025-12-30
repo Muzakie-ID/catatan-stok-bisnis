@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Hp;
+use App\Models\CashFlow;
 use Illuminate\Support\Facades\DB;
 
 class InputStok extends Component
@@ -42,16 +43,29 @@ class InputStok extends Component
     {
         $this->validate();
 
-        Hp::create([
-            'imei' => $this->imei,
-            'merk_model' => $this->merk_model,
-            'warna' => $this->warna,
-            'keterangan_minus' => $this->keterangan_minus,
-            'harga_beli_awal' => $this->harga_beli_awal,
-            'total_modal' => $this->harga_beli_awal,
-            'sumber_beli' => $this->sumber_beli,
-            'status' => 'READY',
-        ]);
+        DB::transaction(function () {
+            $hp = Hp::create([
+                'imei' => $this->imei,
+                'merk_model' => $this->merk_model,
+                'warna' => $this->warna,
+                'keterangan_minus' => $this->keterangan_minus,
+                'harga_beli_awal' => $this->harga_beli_awal,
+                'total_modal' => $this->harga_beli_awal,
+                'sumber_beli' => $this->sumber_beli,
+                'status' => 'READY',
+            ]);
+
+            // Catat Pengeluaran Kas
+            CashFlow::create([
+                'date' => now(),
+                'type' => 'expense',
+                'category' => 'stok',
+                'amount' => $this->harga_beli_awal,
+                'description' => "Beli Stok: {$this->merk_model} ({$this->imei}) dari {$this->sumber_beli}",
+                'reference_type' => Hp::class,
+                'reference_id' => $hp->id,
+            ]);
+        });
 
         $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli']);
         
@@ -126,6 +140,15 @@ class InputStok extends Component
                     'status' => 'READY',
                 ]);
             }
+
+            // Catat Pengeluaran Kas (Total Borongan)
+            CashFlow::create([
+                'date' => now(),
+                'type' => 'expense',
+                'category' => 'stok',
+                'amount' => $this->total_borongan,
+                'description' => "Beli Stok Borongan (" . count($this->bulkItems) . " unit) dari {$this->sumber_beli}",
+            ]);
         });
 
         $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli', 'bulkItems', 'total_borongan']);
