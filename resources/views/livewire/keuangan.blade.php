@@ -3,8 +3,8 @@
     <div class="bg-white p-4 sticky top-0 z-30 shadow-sm border-b border-gray-200">
         <div class="flex justify-between items-center">
             <h1 class="text-xl font-bold text-gray-800">Keuangan & Kas</h1>
-            <button wire:click="toggleForm" class="btn btn-sm btn-primary">
-                {{ $showForm ? 'Batal' : '+ Catat Transaksi' }}
+            <button onclick="modal_keuangan.showModal()" class="btn btn-sm btn-primary">
+                + Catat Transaksi
             </button>
         </div>
     </div>
@@ -28,11 +28,15 @@
             </div>
         </div>
 
-        <!-- Form Input -->
-        @if($showForm)
-        <div class="card bg-base-100 shadow-md border border-base-200 animate-fade-in-down">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-lg mb-2">Catat Transaksi Baru</h3>
+        <!-- Modal Input -->
+        <dialog id="modal_keuangan" class="modal" wire:ignore.self>
+            <div class="modal-box">
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                </form>
+                
+                <h3 class="font-bold text-lg mb-4">Catat Transaksi Baru</h3>
+                
                 <form wire:submit="save" class="space-y-3">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="form-control">
@@ -84,11 +88,10 @@
                         <textarea wire:model="description" class="textarea textarea-sm textarea-bordered" placeholder="Contoh: Bayar Listrik Bulan Ini"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-full mt-2">Simpan Transaksi</button>
+                    <button type="submit" class="btn btn-primary w-full mt-4">Simpan Transaksi</button>
                 </form>
             </div>
-        </div>
-        @endif
+        </dialog>
 
         <!-- List Transaksi -->
         <div>
@@ -126,4 +129,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('close-modal', () => {
+                document.getElementById('modal_keuangan').close();
+            });
+        });
+    </script>
 </div>

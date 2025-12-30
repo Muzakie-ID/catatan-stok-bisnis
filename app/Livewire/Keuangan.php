@@ -16,17 +16,14 @@ class Keuangan extends Component
     public $amount;
     public $description;
 
-    public $showForm = false;
+    // public $showForm = false; // Tidak dipakai lagi karena pakai modal
 
     public function mount()
     {
         $this->date = date('Y-m-d');
     }
 
-    public function toggleForm()
-    {
-        $this->showForm = !$this->showForm;
-    }
+    // public function toggleForm() ... dihapus
 
     public function save()
     {
@@ -47,7 +44,8 @@ class Keuangan extends Component
         ]);
 
         $this->reset(['amount', 'description']);
-        $this->showForm = false;
+        // $this->showForm = false; 
+        $this->dispatch('close-modal'); // Dispatch event untuk tutup modal
         session()->flash('message', 'Transaksi berhasil disimpan.');
     }
 
