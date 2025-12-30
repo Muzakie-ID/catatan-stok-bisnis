@@ -84,17 +84,6 @@ class Penjualan extends Component
                 'tanggal_jual' => now(),
             ]);
 
-            // Catat Pemasukan (CashFlow)
-            \App\Models\CashFlow::create([
-                'date' => now(),
-                'type' => 'income',
-                'category' => 'Penjualan HP',
-                'amount' => $this->total_transaksi,
-                'description' => "Penjualan ke " . ($this->nama_pembeli ?? 'Umum'),
-                'reference_type' => \App\Models\Penjualan::class,
-                'reference_id' => $penjualan->id,
-            ]);
-
             // 2. Buat Detail & Update Stok
             foreach ($this->selectedHps as $hpId) {
                 $hp = Hp::find($hpId);
