@@ -52,6 +52,14 @@ class DetailHp extends Component
         // Hitung selisih harga beli jika berubah, untuk update total modal
         $selisih = $this->edit_harga_beli_awal - $this->hp->harga_beli_awal;
         
+        // Update CashFlow jika harga beli berubah
+        if ($selisih != 0) {
+            \App\Models\CashFlow::where('reference_type', \App\Models\Hp::class)
+                ->where('reference_id', $this->hp->id)
+                ->where('category', 'Pembelian Stok')
+                ->update(['amount' => $this->edit_harga_beli_awal]);
+        }
+
         $this->hp->update([
             'merk_model' => $this->edit_merk_model,
             'warna' => $this->edit_warna,
@@ -68,6 +76,19 @@ class DetailHp extends Component
     public function deleteHp()
     {
         if ($this->hp) {
+            // Hapus CashFlow Pembelian Stok
+            \App\Models\CashFlow::where('reference_type', \App\Models\Hp::class)
+                ->where('reference_id', $this->hp->id)
+                ->delete();
+
+            // Hapus CashFlow Service & Data Service
+            foreach ($this->hp->services as $service) {
+                \App\Models\CashFlow::where('reference_type', \App\Models\Service::class)
+                   ->where('reference_id', $service->id)
+                   ->delete();
+            }
+            $this->hp->services()->delete();
+
             $this->hp->delete();
             $this->dispatch('stok-saved');
             $this->dispatch('close-modal-detail'); // Perlu handle ini di JS view
@@ -91,11 +112,22 @@ class DetailHp extends Component
         ]);
 
         // 1. Simpan data service
-        Service::create([
+        $service = Service::create([
             'hp_id' => $this->hp->id,
             'deskripsi' => $this->deskripsi_service,
             'biaya' => $this->biaya_service,
             'tanggal_service' => now(),
+        ]);
+
+        // Catat Pengeluaran (CashFlow)
+        \App\Models\CashFlow::create([
+            'date' => now(),
+            'type' => 'expense',
+            'category' => 'Service HP',
+            'amount' => $this->biaya_service,
+            'description' => "Service {$this->hp->merk_model}: {$this->deskripsi_service}",
+            'reference_type' => \App\Models\Service::class,
+            'reference_id' => $service->id,
         ]);
 
         // 2. Update Total Modal HP

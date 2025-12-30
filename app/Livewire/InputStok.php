@@ -42,7 +42,7 @@ class InputStok extends Component
     {
         $this->validate();
 
-        Hp::create([
+        $hp = Hp::create([
             'imei' => $this->imei,
             'merk_model' => $this->merk_model,
             'warna' => $this->warna,
@@ -51,6 +51,17 @@ class InputStok extends Component
             'total_modal' => $this->harga_beli_awal,
             'sumber_beli' => $this->sumber_beli,
             'status' => 'READY',
+        ]);
+
+        // Catat Pengeluaran (CashFlow)
+        \App\Models\CashFlow::create([
+            'date' => now(),
+            'type' => 'expense',
+            'category' => 'Pembelian Stok',
+            'amount' => $this->harga_beli_awal,
+            'description' => "Beli {$this->merk_model} (IMEI: {$this->imei})",
+            'reference_type' => \App\Models\Hp::class,
+            'reference_id' => $hp->id,
         ]);
 
         $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli']);
@@ -115,7 +126,7 @@ class InputStok extends Component
 
         DB::transaction(function () {
             foreach ($this->bulkItems as $item) {
-                Hp::create([
+                $hp = Hp::create([
                     'imei' => $item['imei'],
                     'merk_model' => $item['merk_model'],
                     'warna' => $item['warna'] ?? null,
@@ -124,6 +135,17 @@ class InputStok extends Component
                     'total_modal' => $item['harga_beli_awal'],
                     'sumber_beli' => $this->sumber_beli,
                     'status' => 'READY',
+                ]);
+
+                // Catat Pengeluaran per item (CashFlow)
+                \App\Models\CashFlow::create([
+                    'date' => now(),
+                    'type' => 'expense',
+                    'category' => 'Pembelian Stok',
+                    'amount' => $item['harga_beli_awal'],
+                    'description' => "Beli Borongan {$item['merk_model']} (IMEI: {$item['imei']})",
+                    'reference_type' => \App\Models\Hp::class,
+                    'reference_id' => $hp->id,
                 ]);
             }
         });
