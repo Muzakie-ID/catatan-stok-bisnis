@@ -21,4 +21,25 @@ class Hp extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    public function cashFlow()
+    {
+        return $this->morphOne(CashFlow::class, 'reference');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($hp) {
+            // 1. Hapus transaksi pembelian stok (CashFlow)
+            if ($hp->cashFlow) {
+                $hp->cashFlow->delete();
+            }
+
+            // 2. Hapus service satu per satu agar event deleting di Service model jalan
+            // (sehingga CashFlow service juga terhapus)
+            foreach ($hp->services as $service) {
+                $service->delete();
+            }
+        });
+    }
 }

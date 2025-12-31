@@ -28,6 +28,59 @@
             </div>
         </div>
 
+        <!-- Gaji Owner Card -->
+        <div class="card bg-white border border-gray-200 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-bold text-gray-700">Jatah Gaji Owner (50% Profit)</h2>
+                    <div class="badge badge-sm badge-ghost">Akumulasi</div>
+                </div>
+                
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-xs text-gray-500">Bisa Diambil Saat Ini</p>
+                        <p class="text-xl font-bold {{ $availableSalary < 0 ? 'text-red-600' : 'text-green-600' }}">
+                            Rp {{ number_format($availableSalary, 0, ',', '.') }}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400">Sudah Diambil</p>
+                        <p class="text-xs font-semibold text-gray-600">Rp {{ number_format($totalSalaryTaken, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                
+                @if($availableSalary > 0)
+                    <div class="mt-3 pt-3 border-t border-gray-100">
+                        <button onclick="modal_konfirmasi_gaji.showModal()" class="btn btn-xs btn-outline btn-success w-full">
+                            Ambil Semua Gaji (Rp {{ number_format($availableSalary, 0, ',', '.') }})
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Modal Konfirmasi Gaji -->
+        <dialog id="modal_konfirmasi_gaji" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg text-center">Konfirmasi Pengambilan Gaji</h3>
+                <p class="py-4 text-center text-gray-600">
+                    Anda akan mengambil gaji sebesar <br>
+                    <span class="font-bold text-xl text-green-600">Rp {{ number_format($availableSalary, 0, ',', '.') }}</span>
+                </p>
+                <div class="modal-action justify-center">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-ghost mr-2">Batal</button>
+                    </form>
+                    <button onclick="modal_konfirmasi_gaji.close(); modal_keuangan.showModal(); @this.set('type', 'expense'); @this.set('category', 'gaji'); @this.set('amount', {{ $availableSalary }}); @this.set('description', 'Pengambilan Gaji Owner (Otomatis)');" class="btn btn-sm btn-primary">
+                        Ya, Ambil Sekarang
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
+
         <!-- Modal Input -->
         <dialog id="modal_keuangan" class="modal" wire:ignore.self>
             <div class="modal-box">
@@ -93,6 +146,28 @@
             </div>
         </dialog>
 
+        <!-- Modal Konfirmasi Hapus -->
+        <dialog id="modal_hapus_transaksi" class="modal" wire:ignore.self>
+            <div class="modal-box">
+                <h3 class="font-bold text-lg text-center text-red-600">Hapus Transaksi?</h3>
+                <p class="py-4 text-center text-gray-600">
+                    Apakah Anda yakin ingin menghapus transaksi ini? <br>
+                    <span class="text-xs text-gray-400">Data yang dihapus tidak dapat dikembalikan.</span>
+                </p>
+                <div class="modal-action justify-center">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-ghost mr-2">Batal</button>
+                    </form>
+                    <button wire:click="destroy" class="btn btn-sm btn-error text-white">
+                        Ya, Hapus
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
+
         <!-- List Transaksi -->
         <div>
             <h3 class="font-bold text-gray-700 mb-3">Riwayat Transaksi</h3>
@@ -110,7 +185,7 @@
                                     {{ $trx->type == 'income' ? '+' : '-' }} Rp {{ number_format($trx->amount, 0, ',', '.') }}
                                 </div>
                                 @if(!$trx->reference_id)
-                                    <button wire:click="delete({{ $trx->id }})" wire:confirm="Hapus transaksi ini?" class="text-xs text-red-400 underline mt-1">Hapus</button>
+                                    <button wire:click="confirmDelete({{ $trx->id }})" class="text-xs text-red-400 underline mt-1">Hapus</button>
                                 @else
                                     <span class="badge badge-xs badge-ghost mt-1">Otomatis</span>
                                 @endif
@@ -134,6 +209,14 @@
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('close-modal', () => {
                 document.getElementById('modal_keuangan').close();
+            });
+            
+            Livewire.on('open-modal-delete', () => {
+                document.getElementById('modal_hapus_transaksi').showModal();
+            });
+
+            Livewire.on('close-modal-delete', () => {
+                document.getElementById('modal_hapus_transaksi').close();
             });
         });
     </script>

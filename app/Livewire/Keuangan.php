@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\CashFlow;
+use App\Models\DetailPenjualan;
 use Livewire\WithPagination;
 
 class Keuangan extends Component
@@ -15,12 +16,27 @@ class Keuangan extends Component
     public $category = 'operasional';
     public $amount;
     public $description;
+    
+    // Konfigurasi Persentase Gaji (50%)
+    public $salaryPercentage = 50; 
+    
+    public $deleteId;
 
     // public $showForm = false; // Tidak dipakai lagi karena pakai modal
 
     public function mount()
     {
         $this->date = date('Y-m-d');
+    }
+
+    public function updatedType($value)
+    {
+        // Reset kategori ke default yang sesuai saat tipe berubah
+        if ($value == 'income') {
+            $this->category = 'modal_awal';
+        } else {
+            $this->category = 'operasional';
+        }
     }
 
     // public function toggleForm() ... dihapus
@@ -49,10 +65,19 @@ class Keuangan extends Component
         session()->flash('message', 'Transaksi berhasil disimpan.');
     }
 
-    public function delete($id)
+    public function confirmDelete($id)
     {
-        CashFlow::find($id)->delete();
-        session()->flash('message', 'Transaksi dihapus.');
+        $this->deleteId = $id;
+        $this->dispatch('open-modal-delete');
+    }
+
+    public function destroy()
+    {
+        if ($this->deleteId) {
+            CashFlow::find($this->deleteId)->delete();
+            session()->flash('message', 'Transaksi dihapus.');
+            $this->dispatch('close-modal-delete');
+        }
     }
 
     public function render()
@@ -63,11 +88,19 @@ class Keuangan extends Component
         $totalExpense = CashFlow::where('type', 'expense')->sum('amount');
         $balance = $totalIncome - $totalExpense;
 
+        // Hitung Gaji Owner (Profit Sharing)
+        $totalProfitAllTime = DetailPenjualan::sum('laba_rugi');
+        $totalSalaryEntitlement = $totalProfitAllTime * ($this->salaryPercentage / 100);
+        $totalSalaryTaken = CashFlow::where('category', 'gaji')->where('type', 'expense')->sum('amount');
+        $availableSalary = $totalSalaryEntitlement - $totalSalaryTaken;
+
         return view('livewire.keuangan', [
             'transactions' => $transactions,
             'totalIncome' => $totalIncome,
             'totalExpense' => $totalExpense,
             'balance' => $balance,
+            'availableSalary' => $availableSalary,
+            'totalSalaryTaken' => $totalSalaryTaken,
         ]);
     }
 }

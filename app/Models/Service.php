@@ -17,4 +17,16 @@ class Service extends Model
     {
         return $this->belongsTo(Hp::class);
     }
+
+    public function cashFlow()
+    {
+        return $this->morphOne(CashFlow::class, 'reference');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($service) {
+            $service->cashFlow()->delete();
+        });
+    }
 }
