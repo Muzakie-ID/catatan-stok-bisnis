@@ -93,8 +93,19 @@
                             </div>
                         </div>
 
+                        <!-- Checkbox Stok Pending -->
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" wire:model="sudah_bayar" class="checkbox checkbox-primary" /> 
+                                <div>
+                                    <span class="label-text font-bold">Sudah Dibayar/Transfer Dulu?</span>
+                                    <div class="text-[10px] text-gray-500 leading-tight">Centang jika uang sudah dicatat keluar (Stok Pending).</div>
+                                </div>
+                            </label>
+                        </div>
+
                         <!-- Actions -->
-                        <div class="pt-4">
+                        <div class="pt-2">
                             <button type="submit" class="btn btn-primary w-full rounded-xl text-lg font-bold shadow-lg shadow-blue-200">
                                 <span wire:loading.remove>Simpan Stok</span>
                                 <span wire:loading class="loading loading-spinner loading-sm"></span>
@@ -187,6 +198,17 @@
                         </div>
 
                         <div class="pt-2">
+                             <!-- Checkbox Stok Pending -->
+                             <div class="form-control mb-4">
+                                <label class="label cursor-pointer justify-start gap-4">
+                                    <input type="checkbox" wire:model="sudah_bayar" class="checkbox checkbox-primary" /> 
+                                    <div>
+                                        <span class="label-text font-bold">Sudah Dibayar/Transfer Dulu?</span>
+                                        <div class="text-[10px] text-gray-500 leading-tight">Centang jika uang sudah dicatat keluar (Stok Pending).</div>
+                                    </div>
+                                </label>
+                            </div>
+
                             <button wire:click="saveBulk" class="btn btn-primary w-full rounded-xl text-lg font-bold shadow-lg shadow-blue-200" {{ count($bulkItems) == 0 ? 'disabled' : '' }}>
                                 <span wire:loading.remove>Simpan Semua ({{ count($bulkItems) }} Item)</span>
                                 <span wire:loading class="loading loading-spinner loading-sm"></span>

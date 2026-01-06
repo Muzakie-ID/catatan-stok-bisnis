@@ -82,68 +82,87 @@
         </dialog>
 
         <!-- Modal Input -->
-        <dialog id="modal_keuangan" class="modal" wire:ignore.self>
-            <div class="modal-box">
-                <form method="dialog">
-                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                </form>
+        <dialog id="modal_keuangan" class="modal modal-bottom sm:modal-middle" wire:ignore.self>
+            <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl">
                 
-                <h3 class="font-bold text-lg mb-4">Catat Transaksi Baru</h3>
+                <!-- Handle Bar -->
+                <div class="w-full flex justify-center pt-3 pb-1" onclick="modal_keuangan.close()">
+                    <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+                </div>
+
+                <div class="p-6 pt-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-xl text-gray-800">Catat Transaksi</h3>
+                        <form method="dialog">
+                            <button class="btn btn-sm btn-circle btn-ghost text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </form>
+                    </div>
                 
-                <form wire:submit="save" class="space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="form-control">
-                            <label class="label py-1"><span class="label-text text-xs">Tanggal</span></label>
-                            <input type="date" wire:model="date" class="input input-sm input-bordered" />
+                    <form wire:submit="save" class="space-y-4">
+                        <!-- Switcher Tipe -->
+                        <div class="tabs tabs-boxed bg-gray-100 p-1">
+                            <a wire:click="$set('type', 'income')" class="tab w-1/2 {{ $type == 'income' ? 'tab-active bg-white shadow-sm text-green-600 font-bold' : '' }}">Pemasukan</a> 
+                            <a wire:click="$set('type', 'expense')" class="tab w-1/2 {{ $type == 'expense' ? 'tab-active bg-white shadow-sm text-red-500 font-bold' : '' }}">Pengeluaran</a>
                         </div>
-                        <div class="form-control">
-                            <label class="label py-1"><span class="label-text text-xs">Tipe</span></label>
-                            <select wire:model.live="type" class="select select-sm select-bordered">
-                                <option value="income">Pemasukan (+)</option>
-                                <option value="expense">Pengeluaran (-)</option>
-                            </select>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label py-1"><span class="label-text font-medium text-gray-600">Tanggal</span></label>
+                                <input type="date" wire:model="date" class="input input-bordered w-full rounded-xl bg-gray-50 focus:bg-white transition-colors" />
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label py-1"><span class="label-text font-medium text-gray-600">Kategori</span></label>
+                                <select wire:model="category" class="select select-bordered w-full rounded-xl bg-gray-50 focus:bg-white transition-colors">
+                                    @if($type == 'income')
+                                        <option value="modal_awal">Modal Awal</option>
+                                        <option value="penjualan">Penjualan</option>
+                                        <option value="lainnya">Lainnya</option>
+                                    @else
+                                        <option value="operasional">Operasional</option>
+                                        <option value="gaji">Gaji</option>
+                                        <option value="stok_pending">Stok Pending</option>
+                                        <option value="prive">Prive</option>
+                                        <option value="stok">Beli Stok</option>
+                                        <option value="lainnya">Lainnya</option>
+                                    @endif
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs">Kategori</span></label>
-                        <select wire:model="category" class="select select-sm select-bordered">
-                            @if($type == 'income')
-                                <option value="modal_awal">Modal Awal (Suntik Modal)</option>
-                                <option value="penjualan">Penjualan (Manual)</option>
-                                <option value="lainnya">Pemasukan Lainnya</option>
-                            @else
-                                <option value="operasional">Biaya Operasional (Listrik/Sewa)</option>
-                                <option value="gaji">Gaji Karyawan/Owner</option>
-                                <option value="prive">Prive (Tarik Modal Pribadi)</option>
-                                <option value="stok">Pembelian Stok (Manual)</option>
-                                <option value="lainnya">Pengeluaran Lainnya</option>
-                            @endif
-                        </select>
-                    </div>
+                        <div class="form-control w-full">
+                            <label class="label py-1"><span class="label-text font-medium text-gray-600">Nominal (Rp)</span></label>
+                            <div class="relative" x-data="{
+                                val: @entangle('amount'),
+                                format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
+                                update(e) {
+                                    let raw = e.target.value.replace(/[^0-9]/g, '');
+                                    this.val = raw;
+                                    e.target.value = this.format(raw);
+                                }
+                            }">
+                                <input type="text" :value="format(val)" @input="update" class="input input-bordered w-full pl-10 rounded-xl bg-gray-50 focus:bg-white transition-colors font-bold text-lg" placeholder="0" />
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold pointer-events-none">Rp</span>
+                            </div>
+                            @error('amount') <span class="text-error text-xs mt-1 ml-1">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs">Nominal (Rp)</span></label>
-                        <input type="text" x-data="{
-                            val: @entangle('amount'),
-                            format(v) { return v ? new Intl.NumberFormat('id-ID').format(v) : '' },
-                            update(e) {
-                                let raw = e.target.value.replace(/[^0-9]/g, '');
-                                this.val = raw;
-                                e.target.value = this.format(raw);
-                            }
-                        }" :value="format(val)" @input="update" class="input input-sm input-bordered font-bold text-lg" placeholder="0" />
-                        @error('amount') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                    </div>
+                        <div class="form-control w-full">
+                            <label class="label py-1"><span class="label-text font-medium text-gray-600">Keterangan</span></label>
+                            <textarea wire:model="description" class="textarea textarea-bordered h-24 rounded-xl bg-gray-50 focus:bg-white transition-colors" placeholder="Catatan tambahan..."></textarea>
+                        </div>
 
-                    <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs">Keterangan</span></label>
-                        <textarea wire:model="description" class="textarea textarea-sm textarea-bordered" placeholder="Contoh: Bayar Listrik Bulan Ini"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-full mt-4">Simpan Transaksi</button>
-                </form>
+                        <div class="pt-2">
+                             <button type="submit" class="btn btn-primary w-full rounded-xl text-lg font-bold shadow-lg shadow-blue-200">Simpan Transaksi</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+            <form method="dialog" class="modal-backdrop bg-black/20 backdrop-blur-sm">
+                <button>close</button>
+            </form>
         </dialog>
 
         <!-- Modal Konfirmasi Hapus -->

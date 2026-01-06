@@ -18,6 +18,7 @@ class InputStok extends Component
     public $keterangan_minus;
     public $harga_beli_awal;
     public $sumber_beli;
+    public $sudah_bayar = false; // Checkbox untuk Stok Pending
 
     // Bulk Data
     public $bulkItems = []; // Array of items
@@ -35,7 +36,7 @@ class InputStok extends Component
     public function setMode($mode)
     {
         $this->mode = $mode;
-        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'bulkItems', 'total_borongan']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'bulkItems', 'total_borongan', 'sudah_bayar']);
     }
 
     // --- Logic Satuan ---
@@ -55,19 +56,21 @@ class InputStok extends Component
                 'status' => 'READY',
             ]);
 
-            // Catat Pengeluaran Kas
-            CashFlow::create([
-                'date' => now(),
-                'type' => 'expense',
-                'category' => 'stok',
-                'amount' => $this->harga_beli_awal,
-                'description' => "Beli Stok: {$this->merk_model} ({$this->imei}) dari {$this->sumber_beli}",
-                'reference_type' => Hp::class,
-                'reference_id' => $hp->id,
-            ]);
+            // Catat Pengeluaran Kas (Hanya jika belum dibayar sebelumnya)
+            if (!$this->sudah_bayar) {
+                CashFlow::create([
+                    'date' => now(),
+                    'type' => 'expense',
+                    'category' => 'stok',
+                    'amount' => $this->harga_beli_awal,
+                    'description' => "Beli Stok: {$this->merk_model} ({$this->imei}) dari {$this->sumber_beli}",
+                    'reference_type' => Hp::class,
+                    'reference_id' => $hp->id,
+                ]);
+            }
         });
 
-        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli', 'sudah_bayar']);
         
         $this->dispatch('stok-saved'); 
         $this->dispatch('close-modal');
@@ -141,17 +144,19 @@ class InputStok extends Component
                 ]);
             }
 
-            // Catat Pengeluaran Kas (Total Borongan)
-            CashFlow::create([
-                'date' => now(),
-                'type' => 'expense',
-                'category' => 'stok',
-                'amount' => $this->total_borongan,
-                'description' => "Beli Stok Borongan (" . count($this->bulkItems) . " unit) dari {$this->sumber_beli}",
-            ]);
+            // Catat Pengeluaran Kas (Total Borongan) - Hanya jika belum lunas
+            if (!$this->sudah_bayar) {
+                CashFlow::create([
+                    'date' => now(),
+                    'type' => 'expense',
+                    'category' => 'stok',
+                    'amount' => $this->total_borongan,
+                    'description' => "Beli Stok Borongan (" . count($this->bulkItems) . " unit) dari {$this->sumber_beli}",
+                ]);
+            }
         });
 
-        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli', 'bulkItems', 'total_borongan']);
+        $this->reset(['imei', 'merk_model', 'warna', 'keterangan_minus', 'harga_beli_awal', 'sumber_beli', 'bulkItems', 'total_borongan', 'sudah_bayar']);
         
         $this->dispatch('stok-saved'); 
         $this->dispatch('close-modal');

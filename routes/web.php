@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Home;
 use App\Livewire\Stok;
 use App\Livewire\Penjualan;
+use App\Livewire\ServiceIndex;
 use App\Livewire\Laporan;
 use App\Livewire\Keuangan;
-use App\Livewire\ServiceIndex;
 
 Route::get('/', Home::class);
 Route::get('/stok', Stok::class);
