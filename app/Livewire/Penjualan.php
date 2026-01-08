@@ -15,6 +15,14 @@ class Penjualan extends Component
     public $selectedHps = []; // Array ID HP yang dipilih
     public $step = 1; // 1: Pilih Barang, 2: Checkout (Split Harga)
     
+    // Mode View
+    public $viewMode = 'input'; // 'input', 'history'
+    public $historySearch = '';
+
+    // Retur State
+    public $detailIdToReturn = null;
+    public $stokToReturn = null; // Untuk preview di modal
+
     // Data Checkout
     public $nama_pembeli;
     public $total_transaksi;
@@ -57,6 +65,63 @@ class Penjualan extends Component
             $total += (float) $harga;
         }
         $this->total_transaksi = $total;
+    }
+
+    public function confirmReturn($detailId)
+    {
+        $this->detailIdToReturn = $detailId;
+        $this->stokToReturn = DetailPenjualan::with('hp')->find($detailId);
+        $this->dispatch('open-modal-retur');
+    }
+
+    public function processReturn()
+    {
+        if(!$this->detailIdToReturn) return;
+
+        $detail = DetailPenjualan::with(['penjualan', 'hp'])->find($this->detailIdToReturn);
+        
+        if(!$detail) {
+            session()->flash('error', 'Data tidak ditemukan.');
+            return;
+        }
+
+        DB::transaction(function () use ($detail) {
+            $hp = $detail->hp;
+            $penjualan = $detail->penjualan;
+            $refundAmount = $detail->harga_jual_unit;
+
+            // 1. Kembalikan Status HP -> READY
+            if($hp) {
+                $hp->update(['status' => 'READY']);
+            }
+
+            // 2. Catat Pengeluaran (Refund)
+            CashFlow::create([
+                'date' => now(),
+                'type' => 'expense',
+                'category' => 'lainnya', 
+                'amount' => $refundAmount,
+                'description' => "Retur: {$hp->merk_model} ({$hp->imei}). Pembeli: {$penjualan->nama_pembeli}",
+            ]);
+
+            // 3. Hapus Detail Penjualan
+            $detail->delete();
+
+            // 4. Update Header Penjualan
+            if ($penjualan) {
+                $penjualan->total_transaksi -= $refundAmount;
+                $penjualan->save();
+
+                // Jika penjualan kosong (semua item diretur), hapus header + referensi
+                if ($penjualan->details()->count() == 0) {
+                    $penjualan->delete();
+                }
+            }
+        });
+
+        $this->reset(['detailIdToReturn', 'stokToReturn']);
+        $this->dispatch('close-modal-retur');
+        session()->flash('message', 'Barang berhasil diretur & stok dikembalikan.');
     }
 
     public function processPenjualan()
@@ -121,6 +186,25 @@ class Penjualan extends Component
 
     public function render()
     {
+        if ($this->viewMode == 'history') {
+            $history = PenjualanModel::with(['details.hp'])
+                ->where(function($q) {
+                    $q->where('nama_pembeli', 'like', '%'.$this->historySearch.'%')
+                      ->orWhereHas('details.hp', function($subQ) {
+                          $subQ->where('merk_model', 'like', '%'.$this->historySearch.'%')
+                               ->orWhere('imei', 'like', '%'.$this->historySearch.'%');
+                      });
+                })
+                ->latest()
+                ->take(50)
+                ->get();
+
+            return view('livewire.penjualan', [
+                'history' => $history,
+                'hps' => []
+            ]);
+        }
+
         $hps = [];
         if ($this->step == 1) {
             $hps = Hp::where('status', 'READY')

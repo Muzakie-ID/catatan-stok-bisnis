@@ -1,23 +1,84 @@
 <div class="pb-20">
-    {{-- Header --}}
-    <div class="navbar bg-base-100 shadow-sm sticky top-0 z-30">
-        <div class="flex-1">
-            <a class="btn btn-ghost text-xl">
-                @if($step == 1) Pilih Barang @else Checkout @endif
-            </a>
-        </div>
-        <div class="flex-none">
-            @if($step == 2)
-                <button wire:click="prevStep" class="btn btn-square btn-ghost">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            @endif
+    {{-- Tabs Mode --}}
+    <div class="px-4 pt-4 pb-2">
+        <div class="tabs tabs-boxed bg-gray-100 p-1 rounded-xl">
+            <a wire:click="$set('viewMode', 'input')" class="tab w-1/2 h-10 transition-all {{ $viewMode == 'input' ? 'tab-active bg-white shadow-sm text-primary font-bold' : 'text-gray-500 hover:text-gray-700' }}">Input Baru</a>
+            <a wire:click="$set('viewMode', 'history')" class="tab w-1/2 h-10 transition-all {{ $viewMode == 'history' ? 'tab-active bg-white shadow-sm text-primary font-bold' : 'text-gray-500 hover:text-gray-700' }}">Riwayat & Retur</a>
         </div>
     </div>
 
-    <div class="p-4">
+    <!-- Modal Konfirmasi Retur -->
+    <dialog id="modal_retur" class="modal modal-bottom sm:modal-middle" wire:ignore.self>
+        <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl">
+            
+            <!-- Handle Bar -->
+            <div class="w-full flex justify-center pt-3 pb-1" onclick="modal_retur.close()">
+                <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+            </div>
+
+            <div class="p-6 pt-2 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" /></svg>
+                </div>
+                
+                <h3 class="font-bold text-xl text-gray-800 mb-2">Konfirmasi Retur</h3>
+                
+                @if($stokToReturn)
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4 text-left">
+                        <div class="text-xs text-gray-400 font-bold uppercase mb-1">Barang yang diretur</div>
+                        <div class="font-bold text-gray-800">{{ $stokToReturn->hp->merk_model ?? '-' }}</div>
+                        <div class="text-sm text-gray-500 mb-2">{{ $stokToReturn->hp->imei ?? '-' }}</div>
+                        <div class="flex justify-between items-center border-t border-gray-200 pt-2">
+                            <span class="text-xs text-gray-500">Refund Dana:</span>
+                            <span class="font-bold text-red-500">Rp {{ number_format($stokToReturn->harga_jual_unit, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                <p class="text-sm text-gray-500 mb-6">
+                    Tindakan ini akan mengembalikan stok menjadi <b>READY</b> dan mencatat pengeluaran <b>Refund</b> di kas. Lanjutkan?
+                </p>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="modal_retur.close()" class="btn btn-ghost w-full rounded-xl">Batal</button>
+                    <button wire:click="processReturn" class="btn btn-error w-full rounded-xl text-white">Ya, Retur Barang</button>
+                </div>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-black/20 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <script>
+        window.addEventListener('open-modal-retur', event => {
+            document.getElementById('modal_retur').showModal();
+        });
+        window.addEventListener('close-modal-retur', event => {
+            document.getElementById('modal_retur').close();
+        });
+    </script>
+
+    @if($viewMode == 'input')
+        {{-- Header Input --}}
+        <div class="navbar bg-base-100 shadow-sm sticky top-0 z-30">
+            <div class="flex-1">
+                <a class="btn btn-ghost text-xl">
+                    @if($step == 1) Pilih Barang @else Checkout @endif
+                </a>
+            </div>
+            <div class="flex-none">
+                @if($step == 2)
+                    <button wire:click="prevStep" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <div class="p-4">
         @if($step == 1)
             {{-- STEP 1: PILIH BARANG --}}
             
@@ -205,4 +266,60 @@
             </div>
         @endif
     </div>
+
+    @elseif($viewMode == 'history')
+        <div class="p-4 space-y-4">
+            {{-- Search History --}}
+            <div class="relative">
+                <input type="text" wire:model.live="historySearch" placeholder="Cari Pembeli, HP, atau IMEI..." class="input input-bordered w-full rounded-xl bg-gray-50 pl-10 focus:bg-white transition-colors" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+
+            {{-- List History --}}
+            @forelse($history as $trx)
+                <div class="card bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden">
+                    <div class="card-body p-4 bg-gray-50 border-b border-gray-100">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-bold text-gray-800">{{ $trx->nama_pembeli ?: 'Tanpa Nama' }}</div>
+                                <div class="text-xs text-gray-500">{{ $trx->created_at->format('d M Y H:i') }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-primary">Rp {{ number_format($trx->total_transaksi, 0, ',', '.') }}</div>
+                                <div class="text-[10px] uppercase font-bold text-gray-400">Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-100 bg-white">
+                        @foreach($trx->details as $dtl)
+                            <div class="p-3 flex justify-between items-center group hover:bg-gray-50 transition-colors">
+                                <div>
+                                    <div class="font-medium text-sm text-gray-700">{{ $dtl->hp->merk_model ?? 'Item Terhapus' }}</div>
+                                    <div class="text-xs text-gray-400 family-mono">IMEI: {{ $dtl->hp->imei ?? '-' }}</div>
+                                    <div class="text-xs text-green-600 font-semibold mt-1">Rp {{ number_format($dtl->harga_jual_unit, 0, ',', '.') }}</div>
+                                </div>
+                                <div>
+                                    @if($dtl->hp)
+                                        <button 
+                                            wire:click="confirmReturn({{ $dtl->id }})"
+                                            class="btn btn-xs btn-outline btn-error rounded-lg"
+                                        >
+                                            Retur
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-10">
+                    <div class="text-gray-300 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    </div>
+                    <span class="text-gray-400 text-sm">Belum ada riwayat penjualan</span>
+                </div>
+            @endforelse
+        </div>
+    @endif
 </div>
