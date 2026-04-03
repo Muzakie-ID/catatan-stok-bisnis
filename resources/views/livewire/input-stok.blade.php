@@ -245,65 +245,85 @@
         </div>
     </dialog>
 
+    <style>
+        /* Agar viewport dan canvas video Quagga berada di dalam wrapper modal */
+        #reader { position: relative; overflow: hidden; width: 100%; height: 300px; }
+        #reader video, #reader canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
     <script>
-        let html5QrCode;
+        let isScanning = false;
         
         function startScan() {
-            // Cek apakah browser mendukung mediaDevices (biasanya diblokir di HTTP non-localhost)
             if (!navigator.mediaDevices && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                alert('Fitur kamera memerlukan koneksi aman (HTTPS). Jika Anda menggunakan Laragon/Localhost via IP, browser akan memblokir kamera. Silakan akses via localhost atau setup HTTPS.');
+                alert('Fitur kamera memerlukan koneksi aman (HTTPS) atau localhost.');
                 return;
             }
 
             const modal = document.getElementById('modal_scan');
             modal.showModal();
+            isScanning = true;
             
             // Tunggu modal render
             setTimeout(() => {
-                if(!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("reader");
-                }
-                
-                const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
-                
-                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-                .catch(err => {
-                    console.error(`Error starting scanner: ${err}`);
-                    let msg = 'Gagal membuka kamera.';
-                    if (err.toString().includes('Camera streaming not supported')) {
-                        msg = 'Browser memblokir akses kamera. Pastikan Anda menggunakan HTTPS atau localhost.';
-                    } else if (err.name === 'NotAllowedError') {
-                        msg = 'Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser.';
-                    } else {
-                        msg += ' ' + err;
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#reader'), // Target element
+                        constraints: {
+                            facingMode: "environment" // Gunakan kamera belakang
+                        },
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader", // Tipe Barcode umum
+                            "ean_reader", 
+                            "ean_8_reader", 
+                            "code_39_reader", 
+                            "upc_reader"
+                        ]
                     }
-                    alert(msg);
-                    stopScan();
+                }, function(err) {
+                    if (err) {
+                        console.error("Gagal memulai Quagga", err);
+                        alert("Gagal membuka kamera: " + (err.message || err.name));
+                        stopScan();
+                        return;
+                    }
+                    console.log("Initialization finished. Ready to start");
+                    Quagga.start();
                 });
-            }, 200);
-        }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            // Set value to Livewire property
-            @this.set('imei', decodedText);
-            stopScan();
+                // Event tiap kali scan sukses
+                Quagga.onDetected(function(result) {
+                    if(result.codeResult && result.codeResult.code && isScanning) {
+                        var code = result.codeResult.code;
+                        console.log("Sukses Scan Code: " + code);
+                        
+                        // Set value to Livewire property
+                        @this.set('imei', code);
+                        stopScan();
+                    }
+                });
+            }, 300);
         }
 
         function stopScan() {
+            isScanning = false;
+            try { Quagga.stop(); } catch(e){}
             const modal = document.getElementById('modal_scan');
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    try { html5QrCode.clear(); } catch(e){}
-                    html5QrCode = null;
-                    modal.close();
-                }).catch(err => {
-                    console.log('Failed to stop scanner', err);
-                    html5QrCode = null;
-                    modal.close();
-                });
-            } else {
+            if(modal) {
                 modal.close();
             }
+            // Bersihkan konten sisa quagga agar tidak error di scan selanjutnya
+            document.querySelector('#reader').innerHTML = '';
         }
     </script>
 </div>

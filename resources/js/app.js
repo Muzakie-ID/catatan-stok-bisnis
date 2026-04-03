@@ -1,5 +1,4 @@
 import './bootstrap';
-import { Html5QrcodeScanner, Html5Qrcode } from "html5-qrcode";
+import Quagga from '@ericblade/quagga2';
 
-window.Html5QrcodeScanner = Html5QrcodeScanner;
-window.Html5Qrcode = Html5Qrcode;
+window.Quagga = Quagga;
