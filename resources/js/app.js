@@ -1,5 +1,6 @@
 import './bootstrap';
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser';
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import { NotFoundException } from '@zxing/library';
 
 window.BrowserMultiFormatReader = BrowserMultiFormatReader;
 window.NotFoundException = NotFoundException;
