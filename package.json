@@ -16,6 +16,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "@ericblade/quagga2": "^1.8.4"
+        "@zxing/browser": "^0.1.5",
+        "@zxing/library": "^0.21.3"
     }
 }

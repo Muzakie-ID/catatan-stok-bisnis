@@ -237,7 +237,9 @@
         <div class="modal-box relative w-full max-w-md mx-auto rounded-t-3xl rounded-b-none sm:rounded-2xl p-0 bg-white shadow-2xl">
             <div class="p-4">
                 <h3 class="font-bold text-lg mb-4 text-center">Scan Barcode</h3>
-                <div id="reader" class="w-full bg-black rounded-lg overflow-hidden"></div>
+                <div id="reader-container" class="w-full bg-black rounded-lg overflow-hidden">
+                    <video id="reader-video"></video>
+                </div>
                 <div class="modal-action justify-center">
                     <button type="button" onclick="stopScan()" class="btn btn-ghost text-red-500">Batal</button>
                 </div>
@@ -246,18 +248,11 @@
     </dialog>
 
     <style>
-        /* Agar viewport dan canvas video Quagga berada di dalam wrapper modal */
-        #reader { position: relative; overflow: hidden; width: 100%; height: 300px; }
-        #reader video, #reader canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
+        #reader-container { width: 100%; height: 300px; position: relative; overflow: hidden; }
+        #reader-video { width: 100%; height: 100%; object-fit: cover; }
     </style>
     <script>
+        let codeReader;
         let isScanning = false;
         
         function startScan() {
@@ -270,60 +265,48 @@
             modal.showModal();
             isScanning = true;
             
-            // Tunggu modal render
             setTimeout(() => {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: document.querySelector('#reader'), // Target element
-                        constraints: {
-                            facingMode: "environment" // Gunakan kamera belakang
-                        },
-                    },
-                    decoder: {
-                        readers: [
-                            "code_128_reader", // Tipe Barcode umum
-                            "ean_reader", 
-                            "ean_8_reader", 
-                            "code_39_reader", 
-                            "upc_reader"
-                        ]
-                    }
-                }, function(err) {
-                    if (err) {
-                        console.error("Gagal memulai Quagga", err);
-                        alert("Gagal membuka kamera: " + (err.message || err.name));
-                        stopScan();
-                        return;
-                    }
-                    console.log("Initialization finished. Ready to start");
-                    Quagga.start();
-                });
+                if (!codeReader) {
+                    codeReader = new window.BrowserMultiFormatReader();
+                }
 
-                // Event tiap kali scan sukses
-                Quagga.onDetected(function(result) {
-                    if(result.codeResult && result.codeResult.code && isScanning) {
-                        var code = result.codeResult.code;
-                        console.log("Sukses Scan Code: " + code);
+                codeReader.decodeFromVideoDevice(null, 'reader-video', (result, err) => {
+                    if (result && isScanning) {
+                        console.log("Sukses Scan Code: " + result.getText());
                         
-                        // Set value to Livewire property
-                        @this.set('imei', code);
+                        // Isi data ke input Livewire
+                        @this.set('imei', result.getText());
+                        
+                        // Langsung tutup setelah sukses membaca 1x
                         stopScan();
                     }
+                    if (err && !(err instanceof window.NotFoundException)) {
+                        // Jangan alert NotFoundException (itu normal artinya frame tersebut tidak ada barcode)
+                        // console.error(err);
+                    }
+                }).catch((err) => {
+                    console.error("Kesalahan inisialisasi kamera:", err);
+                    alert("Kamera gagal diakses: " + err);
+                    stopScan();
                 });
             }, 300);
         }
 
         function stopScan() {
             isScanning = false;
-            try { Quagga.stop(); } catch(e){}
+            if (codeReader) {
+                try {
+                    // Reset akan menghentikan stream kamera dan membersihkan listener
+                    codeReader.reset();
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+            
             const modal = document.getElementById('modal_scan');
             if(modal) {
                 modal.close();
             }
-            // Bersihkan konten sisa quagga agar tidak error di scan selanjutnya
-            document.querySelector('#reader').innerHTML = '';
         }
     </script>
 </div>

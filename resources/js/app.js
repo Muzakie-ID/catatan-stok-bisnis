@@ -1,4 +1,5 @@
 import './bootstrap';
-import Quagga from '@ericblade/quagga2';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser';
 
-window.Quagga = Quagga;
+window.BrowserMultiFormatReader = BrowserMultiFormatReader;
+window.NotFoundException = NotFoundException;
