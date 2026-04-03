@@ -293,9 +293,12 @@
             const modal = document.getElementById('modal_scan');
             if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
+                    try { html5QrCode.clear(); } catch(e){}
+                    html5QrCode = null;
                     modal.close();
                 }).catch(err => {
                     console.log('Failed to stop scanner', err);
+                    html5QrCode = null;
                     modal.close();
                 });
             } else {
